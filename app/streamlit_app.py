@@ -8,10 +8,18 @@ import plotly.graph_objects as go
 import shap
 import matplotlib.pyplot as plt
 
-# Import custom feature engineer so pickle can find it
 import sys
-sys.path.append(os.path.abspath('.'))
-from src.features import FeatureEngineer
+import os
+
+# Robust path handling for deployment
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.append(PROJECT_ROOT)
+
+# Import custom feature engineers so pickle can find them
+from src.features import FeatureEngineer, RegressionFeatureEngineer
 
 # --- PAGE CONFIG ---
 st.set_page_config(
@@ -26,13 +34,14 @@ def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-if os.path.exists("app/style.css"):
-    local_css("app/style.css")
+style_path = os.path.join(SCRIPT_DIR, "style.css")
+if os.path.exists(style_path):
+    local_css(style_path)
 
 # --- LOAD ARTIFACTS ---
 @st.cache_resource
 def load_models():
-    artifacts_dir = "artifacts"
+    artifacts_dir = os.path.join(PROJECT_ROOT, "artifacts")
     try:
         clf = joblib.load(os.path.join(artifacts_dir, "best_classifier.joblib"))
         reg = joblib.load(os.path.join(artifacts_dir, "best_regressor.joblib"))
@@ -258,10 +267,10 @@ with t3:
             fig_radar.update_traces(fill='toself', line_color='#00B4D8')
             fig_radar.update_layout(
                 paper_bgcolor='white',
-                polar=dict(
-                    radialaxis=dict(visible=True, range=[0, 1]),
-                    bgcolor='#F8F9FA'
-                ),
+                polar={
+                    'radialaxis': {'visible': True, 'range': [0, 1]},
+                    'bgcolor': '#F8F9FA'
+                },
                 margin=dict(l=20,r=20,t=20,b=20),
                 height=250
             )

@@ -1,14 +1,13 @@
 pandas
 numpy
 scikit-learn
-streamlit
-altair<5
+streamlit>=1.36.0
 joblib
 matplotlib
 seaborn
 requests
 xgboost
 lightgbm
-catboost
+
 shap
 plotly
